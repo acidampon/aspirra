@@ -5,3 +5,4 @@ export function requestAIGuide(message,context){return request("/api/guide",{mes
 export function requestAIReplan(goal,context){return request("/api/replan",{goal,context})}
 export function hasRemoteAI(){return Boolean(API_BASE)}
 export async function requestSync(accountId,envelope,token){return request("/api/sync",{envelope},{token})}
+\nexport async function requestCloudState(token){let response;try{response=await fetch(API_BASE+"/api/sync",{headers:{...(token?{Authorization:"Bearer "+token}:{})}})}catch{throw new Error("Aspirra service is unreachable. Your local progress is still safe.")}const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||"Aspirra cloud state is temporarily unavailable");return data}\n
