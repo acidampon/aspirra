@@ -1,5 +1,5 @@
-import{openai}from"@ai-sdk/openai";import{generateObject,generateText}from"ai";import{z}from"zod";
-const model=()=>openai(process.env.AI_MODEL||"gpt-4o-mini");
+import{createOpenAI}from"@ai-sdk/openai";import{generateObject,generateText}from"ai";import{z}from"zod";
+const model=()=>createOpenAI({apiKey:process.env.AI_API_KEY})(process.env.AI_MODEL||"gpt-4o-mini");
 const planSchema=z.object({domain:z.string(),summary:z.string(),milestones:z.array(z.object({title:z.string(),outcome:z.string(),actions:z.array(z.string()).min(1).max(5)})).min(2).max(6),firstAction:z.string(),clarifyingQuestion:z.string()});
 function ensureKey(){if(!process.env.AI_API_KEY)throw new Error("AI_API_KEY is not configured")}
 export async function generatePlan({goal,context={}}){ensureKey();const result=await generateObject({model:model(),schema:planSchema,system:"You are Aspirra, a structured personal progress intelligence. Do not act as a generic chatbot. Turn a user's goal into realistic milestones and concrete actions. Respect stated constraints. Prefer small, observable actions. Do not invent personal facts.",prompt:JSON.stringify({goal,context})});return{...result.object,source:"ai"}}
