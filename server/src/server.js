@@ -6,7 +6,7 @@ function createConfiguredDatabase(){if(process.env.DATABASE_URL){return createPo
 function createApp(database=createConfiguredDatabase()){const app=express();
 const allowedOrigin=process.env.FRONTEND_ORIGIN;const production=process.env.NODE_ENV==="production";if(production&&!allowedOrigin)throw new Error("FRONTEND_ORIGIN is required in production");if(production&&!process.env.DATABASE_URL)throw new Error("DATABASE_URL is required in production");
 const syncService=createSyncService(database);const accountService=createAccountService(database);app.locals.accountService=accountService;app.locals.databaseHealth=typeof database.health==="function"?database.health:undefined;
-app.use(cors(allowedOrigin?{origin:allowedOrigin,methods:["GET","POST"],allowedHeaders:["Content-Type","Authorization"],credentials:false}:{ }));
+app.use(cors(allowedOrigin?{origin:allowedOrigin,methods:["GET","POST"],allowedHeaders:["Content-Type","Authorization"],credentials:false}:false));
 app.use(express.json({limit:"100kb",strict:true}));app.use((error,_req,res,next)=>{if(error?.type==="entity.too.large")return res.status(413).json({error:"Request payload too large"});if(error?.type==="entity.parse.failed")return res.status(400).json({error:"Invalid JSON payload"});return next(error)});
 const requestCounts=new Map();
 const WINDOW_MS=60_000;
