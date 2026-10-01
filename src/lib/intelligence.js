@@ -1,32 +1,5 @@
-const DOMAIN_RULES=[
-  ["career",["job","career","work","employment","cv","resume","interview","promotion","salary","profession"]],
-  ["money",["money","budget","save","savings","debt","income","financial","finance","business"]],
-  ["learning",["learn","study","course","exam","skill","certificate","degree","school","language"]],
-  ["health",["exercise","fitness","run","walk","sleep","wellness","health"]],
-  ["personal",["habit","discipline","confidence","relationship","routine","read","growth","personal"]]
-];
-function words(text){return text.toLowerCase().replace(/[^a-z0-9\s]/g," ").split(/\s+/).filter(Boolean)}
-export function inferDomain(text){const w=words(text);let best={domain:"personal",hits:0};for(const[d,terms]of DOMAIN_RULES){const hits=terms.filter(t=>w.includes(t)).length;if(hits>best.hits)best={domain:d,hits}}return best.domain}
-export function buildIntelligence(goalText){
-  const title=goalText.trim(),domain=inferDomain(title);
-  const domainSteps={
-    career:["Define the target role and constraints","Prepare or improve the strongest application materials","Identify and pursue a small set of relevant opportunities"],
-    money:["Define the financial outcome and target amount","Understand the current numbers and biggest constraint","Choose one repeatable action that improves the position"],
-    learning:["Define the skill and proof of mastery","Choose a focused learning path and practice method","Produce or complete something that demonstrates progress"],
-    health:["Define the outcome and a safe measurable target","Choose a routine that can realistically be repeated","Track the behavior and adjust based on consistency"],
-    personal:["Define the change and what success looks like","Choose one behavior or milestone to practice","Review what is helping and remove one obstacle"]
-  };
-  return {title,domain,summary:"Aspirra has identified "+domain+" as the main area of this goal.",milestones:domainSteps[domain],nextQuestion:"What would make this goal meaningfully closer to complete within the next 7 days?"};
-}
-export function analyzeBlocker(text){
-  const lower=text.toLowerCase();
-  const type=lower.includes("money")||lower.includes("cost")?"resources":lower.includes("time")||lower.includes("busy")?"time":lower.includes("know")||lower.includes("confus")?"clarity":lower.includes("fear")||lower.includes("afraid")||lower.includes("confidence")?"confidence":"other";
-  const suggestions={
-    resources:"Reduce the next step to something that needs little or no money, then identify the smallest resource you actually need.",
-    time:"Shrink the task to a 15–30 minute action and put it at a specific point in your day.",
-    clarity:"Write the desired outcome in one sentence and identify the single decision you need to make next.",
-    confidence:"Choose a low-risk action that creates evidence of progress before tackling the larger step.",
-    other:"Describe the obstacle in one sentence, then separate what you can control from what you cannot."
-  };
-  return {type,suggestion:suggestions[type]};
-}
+const DOMAIN_RULES=[["career",["job","career","work","employment","cv","resume","interview","promotion","promote","salary","profession","hire","hiring","application"]],["money",["money","budget","save","savings","debt","income","financial","finance","business","profit","expense"]],["learning",["learn","study","course","exam","skill","certificate","degree","school","language","training","master"]],["health",["exercise","fitness","run","walk","sleep","wellness","health","weight","workout","diet"]],["personal",["habit","discipline","confidence","relationship","routine","read","growth","personal"]]];
+function words(text){return text.toLowerCase().replace(/[^a-z0-9\\s]/g," ").split(/\\s+/).filter(Boolean)}
+export function inferDomain(text){const w=words(text),joined=w.join(" ");let best={domain:"personal",hits:0};for(const[d,terms]of DOMAIN_RULES){const hits=terms.reduce((n,t)=>n+(w.includes(t)?1:joined.includes(t)?0.5:0),0);if(hits>best.hits)best={domain:d,hits}}return best.domain}
+export function buildIntelligence(goalText){const title=goalText.trim(),domain=inferDomain(title);const domainSteps={career:["Define the target role and constraints","Prepare or improve the strongest application materials","Identify and pursue a small set of relevant opportunities"],money:["Define the financial outcome and target amount","Understand the current numbers and biggest constraint","Choose one repeatable action that improves the position"],learning:["Define the skill and proof of mastery","Choose a focused learning path and practice method","Produce or complete something that demonstrates progress"],health:["Define the outcome and a safe measurable target","Choose a routine that can realistically be repeated","Track the behavior and adjust based on consistency"],personal:["Define the change and what success looks like","Choose one behavior or milestone to practice","Review what is helping and remove one obstacle"]};return{title,domain,summary:"Aspirra has identified "+domain+" as the main area of this goal.",milestones:domainSteps[domain],nextQuestion:"What would make this goal meaningfully closer to complete within the next 7 days?"}}
+export function analyzeBlocker(text){const lower=text.toLowerCase();const type=lower.includes("money")||lower.includes("cost")?"resources":lower.includes("time")||lower.includes("busy")?"time":lower.includes("know")||lower.includes("confus")?"clarity":lower.includes("fear")||lower.includes("afraid")||lower.includes("confidence")?"confidence":"other";const suggestions={resources:"Reduce the next step to something that needs little or no money, then identify the smallest resource you actually need.",time:"Shrink the task to a 15–30 minute action and put it at a specific point in your day.",clarity:"Write the desired outcome in one sentence and identify the single decision you need to make next.",confidence:"Choose a low-risk action that creates evidence of progress before tackling the larger step.",other:"Describe the obstacle in one sentence, then separate what you can control from what you cannot."};return{type,suggestion:suggestions[type]}}
