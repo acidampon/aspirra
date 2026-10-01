@@ -1,5 +1,5 @@
 import{describe,expect,it}from"vitest";
-import{goalSchema,replanSchema,guideSchema}from"./server.js";
+import{goalSchema,replanSchema,guideSchema}from"./schemas.js";
 describe("AI server contract",()=>{
  it("accepts a valid planning request",()=>{expect(goalSchema.safeParse({goal:"Get a new job",context:{domain:"career",constraints:["limited time"]}}).success).toBe(true)});
  it("rejects oversized guide messages",()=>{expect(guideSchema.safeParse({message:"x".repeat(4001)}).success).toBe(false)});
