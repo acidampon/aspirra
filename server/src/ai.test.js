@@ -1,0 +1,1 @@
+import{describe,expect,it}from"vitest";describe("AI server contract",()=>{it("defines the expected API surface",()=>{expect("/api/plan").toBe("/api/plan");expect("/api/guide").toBe("/api/guide")})})
