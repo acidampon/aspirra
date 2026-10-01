@@ -1,0 +1,3 @@
+import{describe,expect,it}from"vitest";import{calculateProgress,buildReview}from"./progress";
+const state={goals:[{id:"g1",title:"Learn"}],actions:[{id:"a1",goalId:"g1",title:"Study"},{id:"a2",goalId:"g1",title:"Practice"}],completedActionIds:["a1"]};
+describe("progress intelligence",()=>{it("calculates goal progress",()=>{expect(calculateProgress(state,"g1").percent).toBe(50)});it("builds an actionable review",()=>{expect(buildReview(state,"g1").nextStep).toContain("next")})})
