@@ -1,7 +1,7 @@
 import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{Pool}from"pg";import{resolveSession}from"./session.js";
 import{createMemoryDatabase}from"./memoryDatabase.js";
 import{createSyncService}from"./syncService.js";import{createPostgresDatabase}from"./postgresDatabase.js";
-import{syncRequestSchema,goalSchema,replanSchema,guideSchema}from"./schemas.js";
+import{syncRequestSchema,sessionRequestSchema,goalSchema,replanSchema,guideSchema}from"./schemas.js";
 function createConfiguredDatabase(){if(process.env.DATABASE_URL){return createPostgresDatabase(new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_SSL==="true"?{rejectUnauthorized:false}:undefined}))}return createMemoryDatabase()}
 function createApp(database=createConfiguredDatabase()){const app=express();
 const allowedOrigin=process.env.FRONTEND_ORIGIN;const production=process.env.NODE_ENV==="production";if(production&&!allowedOrigin)throw new Error("FRONTEND_ORIGIN is required in production");if(production&&!process.env.DATABASE_URL)throw new Error("DATABASE_URL is required in production");
