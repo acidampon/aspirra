@@ -1,5 +1,3 @@
 import{buildIntelligence}from"./intelligence";
-export function createStarterPlan(goalText){
-  const intelligence=buildIntelligence(goalText),actions=intelligence.milestones.map((title,i)=>({id:crypto.randomUUID(),title,detail:i===0?intelligence.nextQuestion:"Turn this milestone into one visible action you can complete and record.",done:false,milestone:i+1}));
-  return{title:intelligence.title,description:intelligence.summary,domain:intelligence.domain,milestones:intelligence.milestones,actions};
-}
+export function createStarterPlan(goalText){const intelligence=buildIntelligence(goalText);const actions=intelligence.milestones.map((title,i)=>({id:crypto.randomUUID(),title,detail:i===0?intelligence.nextQuestion:"Turn this milestone into one visible action you can complete and record.",done:false,milestone:i+1}));return{title:intelligence.title,description:intelligence.summary,domain:intelligence.domain,milestones:intelligence.milestones,actions,source:"local"}}
+export function createAIPlan(goalText,ai){const actions=ai.milestones.flatMap((m,mi)=>m.actions.map((title,aii)=>({id:crypto.randomUUID(),title,detail:m.outcome,done:false,milestone:mi+1,order:aii+1})));return{title:goalText.trim(),description:ai.summary,domain:ai.domain,milestones:ai.milestones.map(m=>m.title),actions,firstAction:ai.firstAction,clarifyingQuestion:ai.clarifyingQuestion,source:"ai"}}
