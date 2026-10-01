@@ -2,9 +2,9 @@ import"dotenv/config";import express from"express";import cors from"cors";import
 import{resolveSession}from"./session.js";
 import{createMemoryDatabase}from"./memoryDatabase.js";
 import{createSyncService}from"./syncService.js";
-export const app=express();
+export function createApp(database=createMemoryDatabase()){const app=express();
 const allowedOrigin=process.env.FRONTEND_ORIGIN;
-const syncService=createSyncService(createMemoryDatabase());
+const syncService=createSyncService(database);
 app.use(cors(allowedOrigin?{origin:allowedOrigin}:{}));
 app.use(express.json({limit:"100kb"}));
 const requestCounts=new Map();
@@ -25,5 +25,7 @@ function handleError(res,error){console.error("Aspirra API error:",error instanc
 app.post("/api/plan",async(req,res)=>{const parsed=goalSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid goal request"});try{res.json(await generatePlan(parsed.data))}catch(error){handleError(res,error)}});
 app.post("/api/replan",async(req,res)=>{const parsed=replanSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid replan request"});try{res.json(await replanGoal(parsed.data))}catch(error){handleError(res,error)}});
 app.post("/api/guide",async(req,res)=>{const parsed=guideSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid guide request"});try{res.json(await chatWithGuide(parsed.data))}catch(error){handleError(res,error)}});
+return app}
+export const app=createApp();
 const port=Number(process.env.PORT||8787);
 if(process.env.NODE_ENV!=="test")app.listen(port,()=>console.log("Aspirra server listening on "+port));
