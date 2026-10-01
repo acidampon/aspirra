@@ -1,5 +1,5 @@
-const KEY="aspirra-state-v5";
-const initialState={schemaVersion:5,goals:[],actions:[],completedActionIds:[],onboardingComplete:false,reflections:[],blockers:[],evidence:[],planRevisions:[],deferredActions:[],actionEvents:[],memory:{preferences:[],constraints:[],importantContext:[]}};
+const KEY="aspirra-state-v6";
+const initialState={schemaVersion:6,goals:[],actions:[],completedActionIds:[],onboardingComplete:false,reflections:[],blockers:[],evidence:[],planRevisions:[],deferredActions:[],actionEvents:[],memory:{preferences:[],constraints:[],importantContext:[]}};
 function migrate(parsed){const goals=parsed.goals||[];return{...initialState,...parsed,schemaVersion:5,goals:goals.map(g=>({...g,status:g.status||"active",planVersion:g.planVersion||1})),actions:(parsed.actions||[]).map(a=>({...a,goalId:a.goalId||((goals.length===1)?goals[0].id:undefined),status:a.status||"open"})),evidence:parsed.evidence||[],planRevisions:parsed.planRevisions||[],deferredActions:parsed.deferredActions||[],actionEvents:parsed.actionEvents||[],memory:{...initialState.memory,...(parsed.memory||{})}})}
 export function loadState(){try{const raw=localStorage.getItem(KEY);if(!raw)return initialState;return migrate(JSON.parse(raw))}catch{return initialState}}
-export function saveState(state){localStorage.setItem(KEY,JSON.stringify({...state,schemaVersion:5}))}
+export function saveState(state){localStorage.setItem(KEY,JSON.stringify({...state,schemaVersion:6}))}
