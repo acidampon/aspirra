@@ -1,5 +1,5 @@
 import{describe,it,expect,beforeEach,afterEach,vi}from"vitest";
-import{loadState,saveState,exportState,importState,createLocalRepository}from"./storage";
+import{loadState,saveState,exportState,importState,createLocalRepository,createRepository}from"./storage";
 
 describe("storage migration",()=>{
  const store=new Map();
@@ -15,7 +15,9 @@ describe("storage migration",()=>{
  it("rejects a persisted primitive root",()=>{store.set("aspirra-state-v6",JSON.stringify("bad"));const state=loadState();expect(state.schemaVersion).toBe(6);expect(state.goals).toEqual([]);});
  it("preserves completed and archived goal status",()=>{store.set("aspirra-state-v6",JSON.stringify({goals:[{id:"g1",status:"completed"},{id:"g2",status:"archived"}],actions:[]}));const state=loadState();expect(state.goals.map(g=>g.status)).toEqual(["completed","archived"]);});
  it("exports and imports a portable state snapshot",()=>{const backup=exportState({activeGoalId:"g1",goals:[{id:"g1",title:"Keep going",status:"active"}],actions:[]});const restored=importState(backup);expect(restored.schemaVersion).toBe(6);expect(restored.activeGoalId).toBe("g1");expect(restored.goals[0].title).toBe("Keep going")});
- it("exposes a local repository contract",()=>{const repository=createLocalRepository();const state=repository.load();expect(state.schemaVersion).toBe(6);expect(typeof repository.save).toBe("function");expect(typeof repository.export).toBe("function");expect(typeof repository.import).toBe("function")});
+ it("exposes a local repository contract",()=>{const repository=createLocalRepository();const state=repository.load();expect(state.schemaVersion).toBe(6);expect(typeof repository.save).toBe("function");expect(typeof repository.export).toBe("function");expect(typeof repository.import).toBe("function");expect(repository.kind).toBe("local");expect(typeof repository.sync).toBe("function")});
+ it("returns an explicit local-only sync result",async()=>{const repository=createLocalRepository();await expect(repository.sync()).resolves.toEqual({status:"local-only",synced:false})});
+ it("rejects unsupported repository kinds",()=>{expect(()=>createRepository({kind:"cloud"})).toThrow("Unsupported repository kind: cloud")});
  it("round-trips state through the repository contract",()=>{const repository=createLocalRepository();const state={activeGoalId:"g1",goals:[{id:"g1",title:"Build Aspirra",status:"active"}],actions:[]};expect(repository.save(state)).toBe(true);const restored=repository.load();expect(restored.activeGoalId).toBe("g1");expect(restored.goals[0].title).toBe("Build Aspirra");const portable=repository.export(restored);expect(repository.import(portable).goals[0].id).toBe("g1")});
  it("persists state with the current schema version",()=>{saveState({activeGoalId:"g1",goals:[],actions:[]});const saved=JSON.parse(store.get("aspirra-state-v6"));expect(saved.schemaVersion).toBe(6);expect(saved.activeGoalId).toBe("g1");});
  it("still saves the new snapshot when backup rotation fails",()=>{store.set("aspirra-state-v6",JSON.stringify({schemaVersion:6,activeGoalId:"old"}));vi.stubGlobal("localStorage",{getItem:key=>store.get(key)||null,setItem:(key,value)=>{if(key==="aspirra-state-v6-backup")throw new Error("quota");store.set(key,value)}});expect(saveState({activeGoalId:"new",goals:[],actions:[]})).toBe(true);expect(JSON.parse(store.get("aspirra-state-v6")).activeGoalId).toBe("new")});
