@@ -4,4 +4,4 @@ export function requestAIPlan(goal,context){return request("/api/plan",{goal,con
 export function requestAIGuide(message,context){return request("/api/guide",{message,context})}
 export function requestAIReplan(goal,context){return request("/api/replan",{goal,context})}
 export function hasRemoteAI(){return Boolean(API_BASE)}
-export async function requestSync(accountId,envelope,token){return request("/api/sync",{accountId,envelope},{token})}
+export async function requestSync(accountId,envelope,token){return request("/api/sync",{envelope},{token})}
