@@ -1,0 +1,1 @@
+export function createSyncService(database){if(!database||typeof database.getSnapshot!=="function"||typeof database.saveSnapshot!=="function")throw new Error("Sync service requires a database adapter");return{async get(accountId){return database.getSnapshot(accountId)},async put(accountId,envelope){return database.saveSnapshot({...envelope,accountId})}}}
