@@ -12,6 +12,7 @@ Aspirra is a structured progress system with AI as an intelligence layer—not a
 
 - Mobile-first React/Vite application with PWA foundation
 - Persistent local state with schema migration support
+- User-controlled JSON backup export/import with migration and recovery safeguards
 - Multi-goal lifecycle: active, completed, archived, restored
 - Goal planning with local intelligence and optional server-side AI
 - Daily top-3 execution queue
