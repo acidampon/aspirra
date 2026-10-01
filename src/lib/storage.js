@@ -7,3 +7,4 @@ export function loadState(){try{const raw=localStorage.getItem(KEY);if(!raw)retu
 export function exportState(state){return JSON.stringify({...initialState,...state,schemaVersion:6},null,2)}
 export function importState(raw){const parsed=typeof raw==="string"?JSON.parse(raw):raw;if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))throw new Error("Invalid Aspirra backup");return migrate(parsed)}
 export function saveState(state){try{const next={...initialState,...state,schemaVersion:6};const serialized=JSON.stringify(next);const previous=localStorage.getItem(KEY);if(previous){try{localStorage.setItem(BACKUP_KEY,previous)}catch{}}localStorage.setItem(KEY,serialized);return localStorage.getItem(KEY)===serialized}catch{return false}}
+export function createLocalRepository(){return{load:()=>loadState(),save:state=>saveState(state),export:state=>exportState(state),import:raw=>importState(raw)}}
