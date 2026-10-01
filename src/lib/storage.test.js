@@ -1,5 +1,5 @@
 import{describe,it,expect,beforeEach,afterEach,vi}from"vitest";
-import{loadState,saveState,exportState,importState,createLocalRepository,createRepository}from"./storage";
+import{loadState,saveState,exportState,importState,createLocalRepository,createRepository,REPOSITORY_SYNC_STATES}from"./storage";
 
 describe("storage migration",()=>{
  const store=new Map();
@@ -16,6 +16,7 @@ describe("storage migration",()=>{
  it("preserves completed and archived goal status",()=>{store.set("aspirra-state-v6",JSON.stringify({goals:[{id:"g1",status:"completed"},{id:"g2",status:"archived"}],actions:[]}));const state=loadState();expect(state.goals.map(g=>g.status)).toEqual(["completed","archived"]);});
  it("exports and imports a portable state snapshot",()=>{const backup=exportState({activeGoalId:"g1",goals:[{id:"g1",title:"Keep going",status:"active"}],actions:[]});const restored=importState(backup);expect(restored.schemaVersion).toBe(6);expect(restored.activeGoalId).toBe("g1");expect(restored.goals[0].title).toBe("Keep going")});
  it("exposes a local repository contract",()=>{const repository=createLocalRepository();const state=repository.load();expect(state.schemaVersion).toBe(6);expect(typeof repository.save).toBe("function");expect(typeof repository.export).toBe("function");expect(typeof repository.import).toBe("function");expect(repository.kind).toBe("local");expect(repository.capabilities).toEqual({sync:false,accounts:false,multiDevice:false});expect(typeof repository.sync).toBe("function")});
+ it("defines stable repository sync states",()=>{expect(REPOSITORY_SYNC_STATES.LOCAL).toBe("local-only");expect(REPOSITORY_SYNC_STATES.SYNCING).toBe("syncing");expect(REPOSITORY_SYNC_STATES.SYNCED).toBe("synced");expect(REPOSITORY_SYNC_STATES.ERROR).toBe("error")});
  it("returns an explicit local-only sync result",async()=>{const repository=createLocalRepository();await expect(repository.sync()).resolves.toEqual({status:"local-only",synced:false,source:"local"})});
  it("rejects unsupported repository kinds",()=>{expect(()=>createRepository({kind:"cloud"})).toThrow("Unsupported repository kind: cloud")});
  it("round-trips state through the repository contract",()=>{const repository=createLocalRepository();const state={activeGoalId:"g1",goals:[{id:"g1",title:"Build Aspirra",status:"active"}],actions:[]};expect(repository.save(state)).toBe(true);const restored=repository.load();expect(restored.activeGoalId).toBe("g1");expect(restored.goals[0].title).toBe("Build Aspirra");const portable=repository.export(restored);expect(repository.import(portable).goals[0].id).toBe("g1")});
