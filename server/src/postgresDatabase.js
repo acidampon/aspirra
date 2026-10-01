@@ -16,7 +16,7 @@ export function createPostgresDatabase(pool){
       return result.rows[0]?.envelope??null;
     },
     async saveSnapshot(snapshot){
-      const accountId=String(snapshot.accountId||"");
+      const accountId=String(snapshot.accountId||"");if(!accountId)throw new Error("Snapshot account id is required");
       const envelope={...snapshot};delete envelope.accountId;
       await pool.query("insert into aspirra_sync_snapshots(account_id,format_version,schema_version,revision,device_id,updated_at,envelope) values($1,$2,$3,$4,$5,$6,$7) on conflict(account_id) do update set format_version=excluded.format_version,schema_version=excluded.schema_version,revision=excluded.revision,device_id=excluded.device_id,updated_at=excluded.updated_at,envelope=excluded.envelope",[accountId,envelope.formatVersion,envelope.schemaVersion,envelope.revision,envelope.deviceId,envelope.updatedAt,envelope]);
       return{...envelope,accountId};
