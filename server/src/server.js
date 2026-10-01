@@ -23,4 +23,4 @@ app.post("/api/guide",async(req,res)=>{const parsed=guideSchema.safeParse(req.bo
 return app}
 export const app=createApp();
 const port=Number(process.env.PORT||8787);
-if(process.env.NODE_ENV!=="test")app.listen(port,()=>console.log("Aspirra server listening on "+port));
+if(process.env.NODE_ENV!=="test")app.listen(port,()=>console.log("Aspirra server listening on "+port))\napp.get("/api/sync",async(req,res)=>{const session=resolveSession(req.headers.authorization?.replace(/^Bearer\\s+/i,""));if(!session)return res.status(401).json({error:"Authentication required"});const envelope=await syncService.get(session.accountId);if(!envelope)return res.status(404).json({error:"No cloud state found"});return res.json({status:"available",action:"pull",envelope})});;
