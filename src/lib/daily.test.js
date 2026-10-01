@@ -1,0 +1,3 @@
+import{describe,expect,it}from"vitest";import{buildToday,deferAction,completeAction}from"./daily";
+const state={goals:[{id:"g",status:"active"}],actions:[{id:"a",goalId:"g",title:"First",milestone:1},{id:"b",goalId:"g",title:"Later",milestone:2},{id:"c",goalId:"g",title:"Third",milestone:1}],completedActionIds:[]};
+describe("daily execution",()=>{it("limits today's queue",()=>{expect(buildToday(state).actions).toHaveLength(3)});it("records deferrals",()=>{expect(deferAction(state,"a","No time").deferredActions).toHaveLength(1)});it("records completion events",()=>{expect(completeAction(state,"a").actionEvents[0].type).toBe("completed")})})
