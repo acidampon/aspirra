@@ -2,7 +2,7 @@ import"dotenv/config";import express from"express";import cors from"cors";import
 import{resolveSession}from"./session.js";
 import{createMemoryDatabase}from"./memoryDatabase.js";
 import{createSyncService}from"./syncService.js";
-export function createApp(database=createMemoryDatabase()){const app=express();
+function createApp(database=createMemoryDatabase()){const app=express();
 const allowedOrigin=process.env.FRONTEND_ORIGIN;
 const syncService=createSyncService(database);
 app.use(cors(allowedOrigin?{origin:allowedOrigin}:{}));
