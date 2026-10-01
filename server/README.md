@@ -39,3 +39,8 @@ Apply `schema.sql` to a PostgreSQL-compatible database when wiring the productio
 ### PostgreSQL adapter
 
 The production adapter is implemented in `src/postgresDatabase.js` and satisfies the same account/snapshot database contract used by the sync service. Configure a PostgreSQL connection pool in the deployment environment and run `schema.sql` before enabling it. The adapter uses parameterized SQL for account and snapshot operations.
+
+
+## Container deployment
+
+The server can be built and run as a container with server/Dockerfile. Copy server/.env.example into the deployment platform environment configuration and provide real production values. Production requires NODE_ENV=production, FRONTEND_ORIGIN, DATABASE_URL, and AI_API_KEY; the reference in-memory database is intentionally not permitted in production.
