@@ -1,0 +1,2 @@
+import{describe,expect,it}from"vitest";import{createStarterPlan}from"./planner";
+describe("createStarterPlan",()=>{it("creates a goal and three concrete actions",()=>{const plan=createStarterPlan("Find a better job");expect(plan.title).toBe("Find a better job");expect(plan.actions).toHaveLength(3);expect(plan.actions.every(a=>a.title&&a.detail)).toBe(true)})})
