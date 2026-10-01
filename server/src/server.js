@@ -1,8 +1,9 @@
-import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{resolveSession}from"./session.js";
+import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{Pool}from"pg";import{resolveSession}from"./session.js";
 import{createMemoryDatabase}from"./memoryDatabase.js";
-import{createSyncService}from"./syncService.js";
+import{createSyncService}from"./syncService.js";import{createPostgresDatabase}from"./postgresDatabase.js";
 import{syncRequestSchema,goalSchema,replanSchema,guideSchema}from"./schemas.js";
-function createApp(database=createMemoryDatabase()){const app=express();
+function createConfiguredDatabase(){if(process.env.DATABASE_URL){return createPostgresDatabase(new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_SSL==="true"?{rejectUnauthorized:false}:undefined}))}return createMemoryDatabase()}
+function createApp(database=createConfiguredDatabase()){const app=express();
 const allowedOrigin=process.env.FRONTEND_ORIGIN;
 const syncService=createSyncService(database);
 app.use(cors(allowedOrigin?{origin:allowedOrigin}:{}));
