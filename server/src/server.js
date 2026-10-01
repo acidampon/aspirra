@@ -1,0 +1,8 @@
+import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{generatePlan,chatWithGuide}from"./ai.js";
+const app=express();app.use(cors());app.use(express.json({limit:"100kb"}));
+app.get("/health",(_,res)=>res.json({ok:true,service:"aspirra-server",version:"0.1.0"}));
+const goalSchema=z.object({goal:z.string().trim().min(3).max(1000),context:z.object({domain:z.string().optional(),constraints:z.array(z.string()).optional(),importantContext:z.array(z.string()).optional()}).optional()});
+app.post("/api/plan",async(req,res)=>{const parsed=goalSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid goal request",details:parsed.error.flatten()});try{res.json(await generatePlan(parsed.data))}catch(error){console.error(error);res.status(502).json({error:"AI planning is temporarily unavailable."})}});
+const guideSchema=z.object({message:z.string().trim().min(1).max(4000),context:z.record(z.any()).optional()});
+app.post("/api/guide",async(req,res)=>{const parsed=guideSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid guide request"});try{res.json(await chatWithGuide(parsed.data))}catch(error){console.error(error);res.status(502).json({error:"AI guide is temporarily unavailable."})}});
+const port=Number(process.env.PORT||8787);app.listen(port,()=>console.log("Aspirra server listening on "+port));
