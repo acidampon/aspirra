@@ -6,7 +6,8 @@ app.use(express.json({limit:"100kb"}));
 const requestCounts=new Map();
 const WINDOW_MS=60_000;
 const MAX_REQUESTS=30;
-function rateLimit(req,res,next){const now=Date.now();const key=req.ip||"unknown";const current=requestCounts.get(key);if(!current||now-current.startedAt>=WINDOW_MS){requestCounts.set(key,{startedAt:now,count:1});return next()}if(current.count>=MAX_REQUESTS)return res.status(429).json({error:"Too many requests. Please try again shortly."});current.count+=1;next()}
+const MAX_TRACKED_CLIENTS=10_000;
+function rateLimit(req,res,next){const now=Date.now();const key=req.ip||"unknown";const current=requestCounts.get(key);if(!current||now-current.startedAt>=WINDOW_MS){if(requestCounts.size>=MAX_TRACKED_CLIENTS){for(const [client,entry] of requestCounts){if(now-entry.startedAt>=WINDOW_MS)requestCounts.delete(client)}if(requestCounts.size>=MAX_TRACKED_CLIENTS)return res.status(429).json({error:"Too many clients. Please try again shortly."})}requestCounts.set(key,{startedAt:now,count:1});return next()}if(current.count>=MAX_REQUESTS)return res.status(429).json({error:"Too many requests. Please try again shortly."});current.count+=1;next()}
 app.use("/api",rateLimit);
 app.get("/health",(_,res)=>res.json({ok:true,service:"aspirra-server",version:"0.1.0"}));
 const contextSchema=z.record(z.unknown()).refine(value=>{try{return JSON.stringify(value).length<=12000}catch{return false}},"Context is too large");
