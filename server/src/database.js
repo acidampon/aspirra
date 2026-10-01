@@ -1,0 +1,3 @@
+export const DATABASE_SCHEMA_VERSION=1;
+export const DATABASE_TABLES=Object.freeze({accounts:"aspirra_accounts",snapshots:"aspirra_sync_snapshots",devices:"aspirra_devices"});
+export function createDatabaseAdapter(driver){if(!driver||typeof driver.getAccount!=="function"||typeof driver.saveAccount!=="function"||typeof driver.getSnapshot!=="function"||typeof driver.saveSnapshot!=="function")throw new Error("Database adapter requires account and snapshot operations");return{kind:"database",schemaVersion:DATABASE_SCHEMA_VERSION,getAccount:id=>driver.getAccount(id),saveAccount:account=>driver.saveAccount(account),getSnapshot:id=>driver.getSnapshot(id),saveSnapshot:snapshot=>driver.saveSnapshot(snapshot)}}
