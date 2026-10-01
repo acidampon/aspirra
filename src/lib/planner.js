@@ -1,5 +1,5 @@
-export function createStarterPlan(goalText){return{title:goalText.trim(),description:"A practical first plan generated from your goal.",actions:[
-{id:crypto.randomUUID(),title:"Define the outcome",detail:"Write down what success will look like and how you will measure it.",done:false},
-{id:crypto.randomUUID(),title:"Choose the next milestone",detail:"Pick one milestone that can be reached within the next 7 days.",done:false},
-{id:crypto.randomUUID(),title:"Take the first concrete step",detail:"Do one action today that creates visible progress.",done:false}
-]}}
+import{buildIntelligence}from"./intelligence";
+export function createStarterPlan(goalText){
+  const intelligence=buildIntelligence(goalText),actions=intelligence.milestones.map((title,i)=>({id:crypto.randomUUID(),title,detail:i===0?intelligence.nextQuestion:"Turn this milestone into one visible action you can complete and record.",done:false,milestone:i+1}));
+  return{title:intelligence.title,description:intelligence.summary,domain:intelligence.domain,milestones:intelligence.milestones,actions};
+}
