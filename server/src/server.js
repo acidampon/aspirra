@@ -1,4 +1,5 @@
 import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{generatePlan,replanGoal,chatWithGuide}from"./ai.js";
+import{getSyncRecord,putSyncRecord}from"./syncStore.js";
 export const app=express();
 const allowedOrigin=process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin?{origin:allowedOrigin}:{}));
@@ -10,6 +11,9 @@ const MAX_TRACKED_CLIENTS=10_000;
 function rateLimit(req,res,next){const now=Date.now();const key=req.ip||"unknown";const current=requestCounts.get(key);if(!current||now-current.startedAt>=WINDOW_MS){if(requestCounts.size>=MAX_TRACKED_CLIENTS){for(const [client,entry] of requestCounts){if(now-entry.startedAt>=WINDOW_MS)requestCounts.delete(client)}if(requestCounts.size>=MAX_TRACKED_CLIENTS)return res.status(429).json({error:"Too many clients. Please try again shortly."})}requestCounts.set(key,{startedAt:now,count:1});return next()}if(current.count>=MAX_REQUESTS)return res.status(429).json({error:"Too many requests. Please try again shortly."});current.count+=1;next()}
 app.use("/api",rateLimit);
 app.get("/health",(_,res)=>res.json({ok:true,service:"aspirra-server",version:"0.1.0"}));
+const syncEnvelopeSchema=z.object({formatVersion:z.literal(1),schemaVersion:z.number().int().positive(),revision:z.number().int().nonnegative(),deviceId:z.string().min(1).max(200),updatedAt:z.string().max(100),account:z.object({mode:z.string().max(20),userId:z.string().min(1).max(200)}),state:z.record(z.unknown())});
+const syncRequestSchema=z.object({accountId:z.string().trim().min(1).max(200),envelope:syncEnvelopeSchema});
+app.post("/api/sync",async(req,res)=>{const parsed=syncRequestSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid sync request"});const incoming=parsed.data.envelope;const current=getSyncRecord(parsed.data.accountId);if(!current){putSyncRecord(parsed.data.accountId,incoming);return res.json({status:"accepted",action:"push",envelope:incoming})}if(incoming.revision>current.revision){putSyncRecord(parsed.data.accountId,incoming);return res.json({status:"accepted",action:"push",envelope:incoming})}if(incoming.revision<current.revision)return res.json({status:"available",action:"pull",envelope:current});if(JSON.stringify(incoming.state)===JSON.stringify(current.state))return res.json({status:"synced",action:"noop",envelope:current});return res.status(409).json({error:"Sync conflict requires review",action:"conflict",local:incoming,remote:current});});
 const contextSchema=z.record(z.unknown()).refine(value=>{try{return JSON.stringify(value).length<=12000}catch{return false}},"Context is too large");
 export const goalSchema=z.object({goal:z.string().trim().min(3).max(1000),context:z.object({domain:z.string().max(100).optional(),constraints:z.array(z.string().max(500)).max(20).optional(),importantContext:z.array(z.string().max(500)).max(20).optional()}).optional()});
 export const replanSchema=z.object({goal:z.string().trim().min(3).max(1000),context:contextSchema.optional()});
