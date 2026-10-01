@@ -1,5 +1,5 @@
-const KEY="aspirra-state-v3";
-const initialState={goals:[],actions:[],completedActionIds:[],onboardingComplete:false,reflections:[],blockers:[],evidence:[],memory:{preferences:[],constraints:[],importantContext:[]}};
-function migrate(parsed){return{...initialState,...parsed,actions:(parsed.actions||[]).map(a=>({...a,goalId:a.goalId||((parsed.goals||[]).length===1?(parsed.goals||[])[0].id:undefined)})),evidence:parsed.evidence||[],memory:{...initialState.memory,...(parsed.memory||{})}}}
+const KEY="aspirra-state-v4";
+const initialState={schemaVersion:4,goals:[],actions:[],completedActionIds:[],onboardingComplete:false,reflections:[],blockers:[],evidence:[],planRevisions:[],memory:{preferences:[],constraints:[],importantContext:[]}};
+function migrate(parsed){const goals=parsed.goals||[];return{...initialState,...parsed,schemaVersion:4,goals:goals.map(g=>({...g,status:g.status||"active",planVersion:g.planVersion||1})),actions:(parsed.actions||[]).map(a=>({...a,goalId:a.goalId||((goals.length===1)?goals[0].id:undefined),status:a.status||"open"})),evidence:parsed.evidence||[],planRevisions:parsed.planRevisions||[],memory:{...initialState.memory,...(parsed.memory||{})}}}
 export function loadState(){try{const raw=localStorage.getItem(KEY);if(!raw)return initialState;return migrate(JSON.parse(raw))}catch{return initialState}}
-export function saveState(state){localStorage.setItem(KEY,JSON.stringify(state))}
+export function saveState(state){localStorage.setItem(KEY,JSON.stringify({...state,schemaVersion:4}))}
