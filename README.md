@@ -26,6 +26,8 @@ Aspirra is a structured progress system with AI as an intelligence layer—not a
 - AI replanning that preserves completed history
 - Server-side AI boundary; provider credentials never belong in the Vite client
 - Automated frontend/server tests and production build checks in GitHub Actions
+- Provider-neutral account, session, database, and authenticated sync foundations
+- PostgreSQL-compatible production persistence schema
 
 ## Architecture
 
@@ -49,4 +51,4 @@ Set VITE_API_URL in the frontend environment when the AI server is deployed. Kee
 
 ## Product direction
 
-The next major layers are durable accounts/data, production security and observability, richer opportunity/career workflows, notifications, and Android packaging. New work should complete coherent vertical slices rather than add disconnected screens.
+The next major layers are connecting a production authentication provider and persistent database adapter, production observability, richer opportunity/career workflows, notifications, and Android packaging. The local-first product remains usable without those cloud services. New work should complete coherent vertical slices rather than add disconnected screens.
