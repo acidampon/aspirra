@@ -1,5 +1,5 @@
 import{z}from"zod";
-const syncEnvelopeSchema=z.object({formatVersion:z.literal(1),schemaVersion:z.number().int().positive(),revision:z.number().int().nonnegative(),deviceId:z.string().min(1).max(200),updatedAt:z.string().max(100),account:z.object({mode:z.string().max(20),userId:z.string().min(1).max(200)}),state:z.record(z.unknown())});
+const syncEnvelopeSchema=z.object({formatVersion:z.literal(1),schemaVersion:z.number().int().positive(),revision:z.number().int().nonnegative(),deviceId:z.string().min(1).max(200),updatedAt:z.string().datetime({offset:true}),account:z.object({mode:z.string().max(20),userId:z.string().min(1).max(200)}),state:z.record(z.unknown())});
 export const syncRequestSchema=z.object({envelope:syncEnvelopeSchema}).strict();
 export const sessionRequestSchema=z.object({accountId:z.string().trim().min(1).max(200),token:z.string().trim().min(16).max(500)});
 export const contextSchema=z.record(z.unknown()).refine(value=>{try{return JSON.stringify(value).length<=12000}catch{return false}},"Context is too large");
