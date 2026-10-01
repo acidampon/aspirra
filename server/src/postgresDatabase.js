@@ -1,7 +1,7 @@
 import{normalizeAccount}from"./account.js";
 export function createPostgresDatabase(pool){
   if(!pool||typeof pool.query!=="function")throw new Error("PostgreSQL database requires a query-capable pool");
-  return{
+  return{async health(){await pool.query("select 1");return true},
     async getAccount(id){
       const result=await pool.query("select id,email,mode,created_at as \"createdAt\",updated_at as \"updatedAt\" from aspirra_accounts where id=$1",[String(id)]);
       return result.rows[0]?normalizeAccount(result.rows[0]):null;
