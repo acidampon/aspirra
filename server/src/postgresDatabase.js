@@ -19,7 +19,7 @@ export function createPostgresDatabase(pool){
       const accountId=String(snapshot.accountId||"");if(!accountId)throw new Error("Snapshot account id is required");
       const envelope={...snapshot};delete envelope.accountId;
       const result=await pool.query("insert into aspirra_sync_snapshots(account_id,format_version,schema_version,revision,device_id,updated_at,envelope) values($1,$2,$3,$4,$5,$6,$7) on conflict(account_id) do update set format_version=excluded.format_version,schema_version=excluded.schema_version,revision=excluded.revision,device_id=excluded.device_id,updated_at=excluded.updated_at,envelope=excluded.envelope where aspirra_sync_snapshots.revision < excluded.revision",[accountId,envelope.formatVersion,envelope.schemaVersion,envelope.revision,envelope.deviceId,envelope.updatedAt,envelope]);
-      if(result.rowCount===0)throw new Error("Snapshot revision conflict");
+      if(result.rowCount===0){const error=new Error("Snapshot revision conflict");error.code="SNAPSHOT_REVISION_CONFLICT";throw error}
       return{...envelope,accountId};
     }
   };
