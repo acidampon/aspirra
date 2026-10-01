@@ -1,5 +1,4 @@
-import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{generatePlan,replanGoal,chatWithGuide}from"./ai.js";
-import{resolveSession}from"./session.js";
+import"dotenv/config";import express from"express";import cors from"cors";import{z}from"zod";import{resolveSession}from"./session.js";
 import{createMemoryDatabase}from"./memoryDatabase.js";
 import{createSyncService}from"./syncService.js";
 function createApp(database=createMemoryDatabase()){const app=express();
@@ -22,9 +21,9 @@ export const goalSchema=z.object({goal:z.string().trim().min(3).max(1000),contex
 export const replanSchema=z.object({goal:z.string().trim().min(3).max(1000),context:contextSchema.optional()});
 export const guideSchema=z.object({message:z.string().trim().min(1).max(4000),context:contextSchema.optional()});
 function handleError(res,error){console.error("Aspirra API error:",error instanceof Error?error.message:"unknown");return res.status(502).json({error:"Aspirra AI service is temporarily unavailable."})}
-app.post("/api/plan",async(req,res)=>{const parsed=goalSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid goal request"});try{res.json(await generatePlan(parsed.data))}catch(error){handleError(res,error)}});
-app.post("/api/replan",async(req,res)=>{const parsed=replanSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid replan request"});try{res.json(await replanGoal(parsed.data))}catch(error){handleError(res,error)}});
-app.post("/api/guide",async(req,res)=>{const parsed=guideSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid guide request"});try{res.json(await chatWithGuide(parsed.data))}catch(error){handleError(res,error)}});
+app.post("/api/plan",async(req,res)=>{const parsed=goalSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid goal request"});try{const{generatePlan}=await import("./ai.js");res.json(await generatePlan(parsed.data))}catch(error){handleError(res,error)}});
+app.post("/api/replan",async(req,res)=>{const parsed=replanSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid replan request"});try{const{replanGoal}=await import("./ai.js");res.json(await replanGoal(parsed.data))}catch(error){handleError(res,error)}});
+app.post("/api/guide",async(req,res)=>{const parsed=guideSchema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:"Invalid guide request"});try{const{chatWithGuide}=await import("./ai.js");res.json(await chatWithGuide(parsed.data))}catch(error){handleError(res,error)}});
 return app}
 export const app=createApp();
 const port=Number(process.env.PORT||8787);
