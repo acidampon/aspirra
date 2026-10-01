@@ -4,7 +4,7 @@ import{createSyncService}from"./syncService.js";import{createPostgresDatabase}fr
 import{syncRequestSchema,goalSchema,replanSchema,guideSchema}from"./schemas.js";
 function createConfiguredDatabase(){if(process.env.DATABASE_URL){return createPostgresDatabase(new Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DATABASE_SSL==="true"?{rejectUnauthorized:false}:undefined}))}return createMemoryDatabase()}
 function createApp(database=createConfiguredDatabase()){const app=express();
-const allowedOrigin=process.env.FRONTEND_ORIGIN;
+const allowedOrigin=process.env.FRONTEND_ORIGIN;const production=process.env.NODE_ENV==="production";if(production&&!allowedOrigin)throw new Error("FRONTEND_ORIGIN is required in production");
 const syncService=createSyncService(database);app.locals.databaseHealth=typeof database.health==="function"?database.health:undefined;
 app.use(cors(allowedOrigin?{origin:allowedOrigin}:{}));
 app.use(express.json({limit:"100kb"}));
