@@ -1,5 +1,5 @@
 import{describe,it,expect,beforeEach,afterEach,vi}from"vitest";
-import{loadState,saveState}from"./storage";
+import{loadState,saveState,exportState,importState}from"./storage";
 
 describe("storage migration",()=>{
  const store=new Map();
@@ -14,6 +14,7 @@ describe("storage migration",()=>{
  it("normalizes malformed collection fields",()=>{store.set("aspirra-state-v6",JSON.stringify({schemaVersion:5,goals:{id:"g1"},actions:"bad",completedActionIds:null,memory:"bad"}));const state=loadState();expect(state.schemaVersion).toBe(6);expect(state.goals).toEqual([]);expect(state.actions).toEqual([]);expect(state.completedActionIds).toEqual([]);expect(state.reflections).toEqual([]);expect(state.memory.preferences).toEqual([]);});
  it("rejects a persisted primitive root",()=>{store.set("aspirra-state-v6",JSON.stringify("bad"));const state=loadState();expect(state.schemaVersion).toBe(6);expect(state.goals).toEqual([]);});
  it("preserves completed and archived goal status",()=>{store.set("aspirra-state-v6",JSON.stringify({goals:[{id:"g1",status:"completed"},{id:"g2",status:"archived"}],actions:[]}));const state=loadState();expect(state.goals.map(g=>g.status)).toEqual(["completed","archived"]);});
+ it("exports and imports a portable state snapshot",()=>{const backup=exportState({activeGoalId:"g1",goals:[{id:"g1",title:"Keep going",status:"active"}],actions:[]});const restored=importState(backup);expect(restored.schemaVersion).toBe(6);expect(restored.activeGoalId).toBe("g1");expect(restored.goals[0].title).toBe("Keep going")});
  it("persists state with the current schema version",()=>{saveState({activeGoalId:"g1",goals:[],actions:[]});const saved=JSON.parse(store.get("aspirra-state-v6"));expect(saved.schemaVersion).toBe(6);expect(saved.activeGoalId).toBe("g1");});
  it("keeps the previous snapshot when serialization fails",()=>{store.set("aspirra-state-v6",JSON.stringify({schemaVersion:6,activeGoalId:"safe"}));const circular={};circular.self=circular;expect(saveState({activeGoalId:"unsafe",circular})).toBe(false);expect(JSON.parse(store.get("aspirra-state-v6")).activeGoalId).toBe("safe");});
 });
