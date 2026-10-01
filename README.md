@@ -52,3 +52,6 @@ Set VITE_API_URL in the frontend environment when the AI server is deployed. Kee
 ## Product direction
 
 The next major layers are connecting a production authentication provider and persistent database adapter, production observability, richer opportunity/career workflows, notifications, and Android packaging. The local-first product remains usable without those cloud services. New work should complete coherent vertical slices rather than add disconnected screens.
+
+
+<!-- CI release verification enabled -->
