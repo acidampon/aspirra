@@ -6,3 +6,5 @@ export const contextSchema=z.record(z.unknown()).refine(value=>{try{return JSON.
 export const goalSchema=z.object({goal:z.string().trim().min(3).max(1000),context:z.object({domain:z.string().max(100).optional(),constraints:z.array(z.string().max(500)).max(20).optional(),importantContext:z.array(z.string().max(500)).max(20).optional()}).optional()});
 export const replanSchema=z.object({goal:z.string().trim().min(3).max(1000),context:contextSchema.optional()});
 export const guideSchema=z.object({message:z.string().trim().min(1).max(4000),context:contextSchema.optional()});
+
+export function validateSyncEnvelope(envelope){const parsed=syncEnvelopeSchema.safeParse(envelope);return{valid:parsed.success,reason:parsed.success?"":parsed.error.issues[0]?.message||"invalid-envelope"}}
